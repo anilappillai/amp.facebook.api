@@ -1,0 +1,4 @@
+[submodule "src/Amp.Core"]
+	path = src/Amp.Core
+	url = https://github.com/anilappillai/amp_submodules.git
+	branch = master

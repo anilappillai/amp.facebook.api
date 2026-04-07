@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Amp.Facebook.Api</RootNamespace>
+    <AssemblyName>Amp.Facebook.Api</AssemblyName>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <!-- Amp.Core submodule — shared infrastructure across all AMP services -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Amp.Core\src\Amp.Core.Common\Amp.Core.Common.csproj" />
+    <ProjectReference Include="..\..\src\Amp.Core\src\Amp.Core.Extensions\Amp.Core.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\Amp.Core\src\Amp.Core.Middleware\Amp.Core.Middleware.csproj" />
+    <ProjectReference Include="..\..\src\Amp.Core\src\Amp.Core.Services\Amp.Core.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Logging — Serilog host integration and CloudWatch sink (not in Amp.Core) -->
+    <PackageReference Include="Serilog.AspNetCore" Version="8.*" />
+    <PackageReference Include="Serilog.Sinks.AwsCloudWatch" Version="2.*" />
+    <!-- Override old AWSSDK.CloudWatchLogs 3.3.x pulled by Serilog.Sinks.AwsCloudWatch;
+         3.3.x requires AWSSDK.Core < 3.4.0 which conflicts with Amp.Core.Extensions >= 3.7.x -->
+    <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.7.507.*" />
+
+    <!-- OpenTelemetry — needed because Amp.Core.Extensions exposes OpenTelemetryBuilder
+         in its public API surface (AddAwsMetricsExporter optional configure param). -->
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.*" />
+  </ItemGroup>
+
+</Project>

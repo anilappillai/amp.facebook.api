@@ -43,4 +43,6 @@ internal static class FacebookApiConstants
     public const string ErrorEmptyPostResponse = "Empty response from Facebook when creating post.";
     public const string ErrorEmptyPhotoResponse = "Empty response from Facebook when uploading photo.";
     public const string ErrorUrlOrBase64RequiredService = "Either Url or Base64 must be provided for photo upload.";
+    public const string ErrorPhotoBatchEmpty = "At least one photo is required.";
+    public const string ErrorPhotoBatchTooLarge = "A maximum of 10 photos can be uploaded per request.";
 }

@@ -141,6 +141,46 @@ public class FacebookController(
     }
 
     /// <summary>
+    /// Uploads multiple photos to a Facebook page in a single request.
+    /// Photos are uploaded in parallel; individual failures are reported per-item
+    /// and do not abort the remaining uploads.
+    /// Maximum 10 photos per request.
+    /// </summary>
+    /// <remarks>
+    /// Requires a valid <b>page access token</b> in the <c>X-Page-Access-Token</c> header.
+    /// The token must have the <c>pages_manage_posts</c> permission.
+    /// </remarks>
+    /// <param name="pageId">The Facebook page ID.</param>
+    [HttpPost("pages/{pageId}/photos/batch")]
+    [ProducesResponseType(typeof(List<UploadPhotoBatchItemResult>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    public async Task<IActionResult> UploadPhotosAsync(
+        string pageId,
+        [FromHeader(Name = FacebookApiConstants.HeaderPageAccessToken)] string pageAccessToken,
+        [FromBody] UploadPhotosBatchRequest request,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(pageAccessToken))
+            return BadRequest(FacebookApiConstants.ErrorPageTokenRequired);
+
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (request.Photos.Any(p => string.IsNullOrWhiteSpace(p.Url) && string.IsNullOrWhiteSpace(p.Base64)))
+            return BadRequest(FacebookApiConstants.ErrorUrlOrBase64Required);
+
+        var results = await facebook.UploadPhotosAsync(pageId, pageAccessToken, request.Photos, ct);
+
+        logger.LogInformation(
+            "Batch upload complete for page {PageId}: {Succeeded}/{Total} succeeded",
+            pageId, results.Count(r => r.Success), results.Count);
+
+        return Ok(results);
+    }
+
+    /// <summary>
     /// Deletes a photo from a Facebook page.
     /// </summary>
     /// <remarks>

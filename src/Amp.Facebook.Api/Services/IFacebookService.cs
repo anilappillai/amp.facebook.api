@@ -48,6 +48,18 @@ public interface IFacebookService
         CancellationToken ct = default);
 
     /// <summary>
+    /// Uploads multiple photos to a Facebook page in parallel.
+    /// Each item in the returned list corresponds by index to the input request.
+    /// Individual failures are captured per-item and do not abort the batch.
+    /// Calls: POST /{pageId}/photos (once per photo)
+    /// </summary>
+    Task<List<UploadPhotoBatchItemResult>> UploadPhotosAsync(
+        string pageId,
+        string pageAccessToken,
+        IReadOnlyList<UploadPhotoRequest> requests,
+        CancellationToken ct = default);
+
+    /// <summary>
     /// Deletes a photo from a Facebook page.
     /// Calls: DELETE /{photoId}
     /// </summary>

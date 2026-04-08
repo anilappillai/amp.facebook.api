@@ -125,6 +125,34 @@ public sealed class FacebookService(
     }
 
     /// <inheritdoc/>
+    public async Task<List<UploadPhotoBatchItemResult>> UploadPhotosAsync(
+        string pageId, string pageAccessToken, IReadOnlyList<UploadPhotoRequest> requests, CancellationToken ct = default)
+    {
+        logger.LogInformation("Uploading {Count} photos to Facebook page {PageId}", requests.Count, pageId);
+
+        var tasks = requests.Select((request, index) =>
+            UploadSingleAsync(pageId, pageAccessToken, request, index, ct));
+
+        var results = await Task.WhenAll(tasks);
+        return [.. results];
+    }
+
+    private async Task<UploadPhotoBatchItemResult> UploadSingleAsync(
+        string pageId, string pageAccessToken, UploadPhotoRequest request, int index, CancellationToken ct)
+    {
+        try
+        {
+            var result = await UploadPhotoAsync(pageId, pageAccessToken, request, ct);
+            return new UploadPhotoBatchItemResult { Index = index, Success = true, PhotoId = result.Id };
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Batch photo upload failed for index {Index} on page {PageId}", index, pageId);
+            return new UploadPhotoBatchItemResult { Index = index, Success = false, Error = ex.Message };
+        }
+    }
+
+    /// <inheritdoc/>
     public async Task<bool> DeletePhotoAsync(
         string photoId, string pageAccessToken, CancellationToken ct = default)
     {

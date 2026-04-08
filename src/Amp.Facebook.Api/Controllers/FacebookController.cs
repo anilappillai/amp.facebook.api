@@ -1,5 +1,6 @@
 using Amp.Facebook.Api.Models.Facebook;
 using Amp.Facebook.Api.Services;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Amp.Facebook.Api.Controllers;
@@ -12,7 +13,8 @@ namespace Amp.Facebook.Api.Controllers;
 /// They are NEVER stored server-side.
 /// </summary>
 [ApiController]
-[Route("api/facebook")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/facebook")]
 [Produces("application/json")]
 public class FacebookController(
     IFacebookService facebook,

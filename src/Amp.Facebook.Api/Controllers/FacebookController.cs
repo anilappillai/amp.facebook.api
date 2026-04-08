@@ -1,3 +1,4 @@
+using Amp.Facebook.Api.Infrastructure;
 using Amp.Facebook.Api.Models.Facebook;
 using Amp.Facebook.Api.Services;
 using Asp.Versioning;
@@ -32,13 +33,14 @@ public class FacebookController(
     [HttpGet("pages")]
     [ProducesResponseType(typeof(List<FacebookPageInfo>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<IActionResult> GetPagesAsync(
-        [FromHeader(Name = "X-User-Access-Token")] string userAccessToken,
+        [FromHeader(Name = FacebookApiConstants.HeaderUserAccessToken)] string userAccessToken,
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(userAccessToken))
-            return BadRequest("X-User-Access-Token header is required.");
+            return BadRequest(FacebookApiConstants.ErrorUserTokenRequired);
 
         var pages = await facebook.GetUserPagesAsync(userAccessToken, ct);
         return Ok(pages);
@@ -57,18 +59,19 @@ public class FacebookController(
     [HttpPost("pages/{pageId}/posts")]
     [ProducesResponseType(typeof(FacebookCreateResult), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<IActionResult> CreatePostAsync(
         string pageId,
-        [FromHeader(Name = "X-Page-Access-Token")] string pageAccessToken,
+        [FromHeader(Name = FacebookApiConstants.HeaderPageAccessToken)] string pageAccessToken,
         [FromBody] PostToPageRequest request,
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(pageAccessToken))
-            return BadRequest("X-Page-Access-Token header is required.");
+            return BadRequest(FacebookApiConstants.ErrorPageTokenRequired);
 
         if (string.IsNullOrWhiteSpace(request.Message))
-            return BadRequest("Message is required.");
+            return BadRequest(FacebookApiConstants.ErrorMessageRequired);
 
         var result = await facebook.CreatePostAsync(pageId, pageAccessToken, request, ct);
         logger.LogInformation("Created post {PostId} on page {PageId}", result.Id, pageId);
@@ -86,18 +89,19 @@ public class FacebookController(
     [HttpDelete("posts/{postId}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<IActionResult> DeletePostAsync(
         string postId,
-        [FromHeader(Name = "X-Page-Access-Token")] string pageAccessToken,
+        [FromHeader(Name = FacebookApiConstants.HeaderPageAccessToken)] string pageAccessToken,
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(pageAccessToken))
-            return BadRequest("X-Page-Access-Token header is required.");
+            return BadRequest(FacebookApiConstants.ErrorPageTokenRequired);
 
         var success = await facebook.DeletePostAsync(postId, pageAccessToken, ct);
         if (!success)
-            return StatusCode(StatusCodes.Status502BadGateway, "Facebook did not confirm deletion.");
+            return StatusCode(StatusCodes.Status502BadGateway, FacebookApiConstants.ErrorDeletionNotConfirmed);
 
         logger.LogInformation("Deleted post {PostId}", postId);
         return NoContent();
@@ -117,18 +121,19 @@ public class FacebookController(
     [HttpPost("pages/{pageId}/photos")]
     [ProducesResponseType(typeof(FacebookCreateResult), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<IActionResult> UploadPhotoAsync(
         string pageId,
-        [FromHeader(Name = "X-Page-Access-Token")] string pageAccessToken,
+        [FromHeader(Name = FacebookApiConstants.HeaderPageAccessToken)] string pageAccessToken,
         [FromBody] UploadPhotoRequest request,
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(pageAccessToken))
-            return BadRequest("X-Page-Access-Token header is required.");
+            return BadRequest(FacebookApiConstants.ErrorPageTokenRequired);
 
         if (string.IsNullOrWhiteSpace(request.Url) && string.IsNullOrWhiteSpace(request.Base64))
-            return BadRequest("Either Url or Base64 must be provided.");
+            return BadRequest(FacebookApiConstants.ErrorUrlOrBase64Required);
 
         var result = await facebook.UploadPhotoAsync(pageId, pageAccessToken, request, ct);
         logger.LogInformation("Uploaded photo {PhotoId} to page {PageId}", result.Id, pageId);
@@ -146,18 +151,19 @@ public class FacebookController(
     [HttpDelete("photos/{photoId}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<IActionResult> DeletePhotoAsync(
         string photoId,
-        [FromHeader(Name = "X-Page-Access-Token")] string pageAccessToken,
+        [FromHeader(Name = FacebookApiConstants.HeaderPageAccessToken)] string pageAccessToken,
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(pageAccessToken))
-            return BadRequest("X-Page-Access-Token header is required.");
+            return BadRequest(FacebookApiConstants.ErrorPageTokenRequired);
 
         var success = await facebook.DeletePhotoAsync(photoId, pageAccessToken, ct);
         if (!success)
-            return StatusCode(StatusCodes.Status502BadGateway, "Facebook did not confirm deletion.");
+            return StatusCode(StatusCodes.Status502BadGateway, FacebookApiConstants.ErrorDeletionNotConfirmed);
 
         logger.LogInformation("Deleted photo {PhotoId}", photoId);
         return NoContent();

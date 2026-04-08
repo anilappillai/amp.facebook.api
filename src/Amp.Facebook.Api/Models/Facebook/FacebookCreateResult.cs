@@ -5,7 +5,7 @@ namespace Amp.Facebook.Api.Models.Facebook;
 /// <summary>Returned after successfully creating a post or photo.</summary>
 public sealed class FacebookCreateResult
 {
-    /// <summary>The ID of the created post / photo. Format: {page-id}_{object-id}.</summary>
+    /// <summary>The ID of the created post or photo. Format: {page-id}_{object-id}.</summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
 

@@ -1,12 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Amp.Facebook.Api.Models.Facebook;
 
 /// <summary>Request body for creating a text post on a Facebook page.</summary>
 public sealed class PostToPageRequest
 {
     /// <summary>The text content of the post.</summary>
+    [Required]
+    [MinLength(1)]
     public string Message { get; set; } = string.Empty;
 
     /// <summary>Optional URL attached to the post (link preview).</summary>
+    [Url]
     public string? Link { get; set; }
 
     /// <summary>Publish immediately (true) or create as a draft/scheduled post (false).</summary>

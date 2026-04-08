@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Amp.Facebook.Api.Models.Facebook;
 
 /// <summary>Request body for uploading a photo to a Facebook page.</summary>
@@ -7,6 +9,7 @@ public sealed class UploadPhotoRequest
     /// Publicly accessible URL of the photo to upload.
     /// Provide either <see cref="Url"/> or <see cref="Base64"/>, not both.
     /// </summary>
+    [Url]
     public string? Url { get; set; }
 
     /// <summary>
@@ -16,6 +19,7 @@ public sealed class UploadPhotoRequest
     public string? Base64 { get; set; }
 
     /// <summary>Optional caption for the photo.</summary>
+    [MaxLength(2200)]
     public string? Caption { get; set; }
 
     /// <summary>Publish immediately. Set false to add to the page's photo album without publishing.</summary>
